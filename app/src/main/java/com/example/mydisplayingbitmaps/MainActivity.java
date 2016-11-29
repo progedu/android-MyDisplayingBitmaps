@@ -1,5 +1,6 @@
 package com.example.mydisplayingbitmaps;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v7.app.AppCompatActivity;
@@ -26,12 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
         final List<ImageView> listImageView = new ArrayList<>();
         for (int i = 0; i < 10 ; i++) {
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.sample, options);
-            int imageHeight = options.outHeight;
-            int imageWidth = options.outWidth;
-            String imageType = options.outMimeType;
-            Log.d("MainActivity", "height:" + imageHeight + " width:" + imageWidth + " type:" + imageType);
+            Bitmap bm = decodeSampledBitmapFromResource(getResources(), R.drawable.sample, 240, 180);
 
             ImageView imageView = new ImageView(MainActivity.this);
             imageView.setLayoutParams(new GridView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 320));
@@ -64,5 +60,44 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         mGridView.setAdapter(mAdapter);
+    }
+
+    public Bitmap decodeSampledBitmapFromResource(Resources res, int resId,
+                                                         int reqWidth, int reqHeight) {
+
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeResource(res, resId, options);
+
+        // Calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeResource(res, resId, options);
+    }
+
+    public int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) >= reqHeight
+                    && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
     }
 }
