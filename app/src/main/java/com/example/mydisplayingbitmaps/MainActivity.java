@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
         mGridView.setNumColumns(3);
 
         final List<ImageView> listImageView = new ArrayList<>();
-        for (int i = 0; i < 10 ; i++) {
+        for (int i = 0; i < 100 ; i++) {
             Bitmap bm = decodeSampledBitmapFromResource(getResources(), R.drawable.sample, 240, 180);
 
             ImageView imageView = new ImageView(MainActivity.this);
