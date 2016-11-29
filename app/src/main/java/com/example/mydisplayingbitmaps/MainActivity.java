@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -33,9 +32,6 @@ public class MainActivity extends AppCompatActivity {
             imageView.setLayoutParams(new GridView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 320));
             loadBitmap(R.drawable.sample, imageView);
             listImageView.add(imageView);
-
-            Runtime r = Runtime.getRuntime();
-            Log.d("MainActivity", "usedmemory[MB]:" + (int)((r.totalMemory() - r.freeMemory())/ (1024 * 1024)));
         }
 
         BaseAdapter mAdapter = new BaseAdapter() {
