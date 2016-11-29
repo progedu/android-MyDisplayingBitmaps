@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
         final List<ImageView> listImageView = new ArrayList<>();
         for (int i = 0; i < 100 ; i++) {
-            Bitmap bm = decodeSampledBitmapFromResource(getResources(), R.drawable.sample, 240, 180);
+            Bitmap bm = decodeSampledBitmapFromResource(getResources(), R.drawable.sample, 180, 320);
 
             ImageView imageView = new ImageView(MainActivity.this);
             imageView.setLayoutParams(new GridView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 320));
