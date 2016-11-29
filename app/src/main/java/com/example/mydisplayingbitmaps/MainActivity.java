@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.LruCache;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -18,10 +19,29 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private LruCache<String, Bitmap> mMemoryCache;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Get max available VM memory, exceeding this amount will throw an
+        // OutOfMemory exception. Stored in kilobytes as LruCache takes an
+        // int in its constructor.
+        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+
+        // Use 1/8th of the available memory for this memory cache.
+        final int cacheSize = maxMemory / 8;
+
+        mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+            @Override
+            protected int sizeOf(String key, Bitmap bitmap) {
+                // The cache size will be measured in kilobytes rather than
+                // number of items.
+                return bitmap.getByteCount() / 1024;
+            }
+        };
 
         GridView mGridView = (GridView)findViewById(R.id.gridView);
         mGridView.setNumColumns(3);
@@ -58,9 +78,27 @@ public class MainActivity extends AppCompatActivity {
         mGridView.setAdapter(mAdapter);
     }
 
+    public void addBitmapToMemoryCache(String key, Bitmap bitmap) {
+        if (getBitmapFromMemCache(key) == null) {
+            mMemoryCache.put(key, bitmap);
+        }
+    }
+
+    public Bitmap getBitmapFromMemCache(String key) {
+        return mMemoryCache.get(key);
+    }
+
     public void loadBitmap(int resId, ImageView imageView) {
-        BitmapWorkerTask task = new BitmapWorkerTask(imageView, getResources());
-        task.execute(resId);
+        final String imageKey = String.valueOf(resId);
+
+        final Bitmap bitmap = getBitmapFromMemCache(imageKey);
+        if (bitmap != null) {
+            imageView.setImageBitmap(bitmap);
+        } else {
+            imageView.setImageResource(R.mipmap.ic_launcher);
+            BitmapWorkerTask task = new BitmapWorkerTask(imageView, getResources());
+            task.execute(resId);
+        }
     }
 
     class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
@@ -76,7 +114,9 @@ public class MainActivity extends AppCompatActivity {
         // Decode image in background.
         @Override
         protected Bitmap doInBackground(Integer... params) {
-            return decodeSampledBitmapFromResource(resources, params[0], 180, 320);
+            Bitmap bitmap = decodeSampledBitmapFromResource(resources, params[0], 180, 320);
+            addBitmapToMemoryCache(String.valueOf(params[0]), bitmap);
+            return bitmap;
         }
 
         // Once complete, see if ImageView is still around and set bitmap.
