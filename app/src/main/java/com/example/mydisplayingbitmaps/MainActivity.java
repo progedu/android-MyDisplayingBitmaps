@@ -37,6 +37,9 @@ public class MainActivity extends AppCompatActivity {
             imageView.setLayoutParams(new GridView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 320));
             imageView.setImageBitmap(bm);
             listImageView.add(imageView);
+
+            Runtime r = Runtime.getRuntime();
+            Log.d("MainActivity", "usedmemory[MB]:" + (int)((r.totalMemory() - r.freeMemory())/ (1024 * 1024)));
         }
 
         BaseAdapter mAdapter = new BaseAdapter() {
