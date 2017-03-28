@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.graphics.Bitmap;
 
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
             Picasso.with(this)
                     .load(Uri.parse("https://progedu.github.io/asset/spapp-curriculum/images/sample.jpg"))
                     .placeholder(R.mipmap.ic_launcher)
-                    .resize(180, 320)
+                    .transform(new CropTransformation())
                     .into(imageView);
             listImageView.add(imageView);
         }
@@ -61,6 +62,20 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         mGridView.setAdapter(mAdapter);
+    }
+
+    private class CropTransformation implements Transformation {
+
+        @Override public Bitmap transform(Bitmap source) {
+
+            Bitmap result = Bitmap.createBitmap(source, 340, 120, 360, 640);
+            if (result != source) {
+                source.recycle();
+            }
+            return result;
+        }
+
+        @Override public String key() { return "cropTransform()"; }
     }
 
 }
